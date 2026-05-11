@@ -1,0 +1,29 @@
+services:
+  action1-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: ghcr.io/wyre-technology/action1-mcp:latest
+    container_name: action1-mcp-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      - ACTION1_CLIENT_ID=${ACTION1_CLIENT_ID}
+      - ACTION1_CLIENT_SECRET=${ACTION1_CLIENT_SECRET}
+      - ACTION1_TENANT=${ACTION1_TENANT}
+      - MCP_TRANSPORT=http
+      - AUTH_MODE=env
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes: {}

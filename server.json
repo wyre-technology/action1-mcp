@@ -1,0 +1,69 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.wyre-technology/action1-mcp",
+  "title": "Action1",
+  "description": "MCP server for Action1 — endpoint inventory, patch visibility, and policy automation via the Action1 REST API.",
+  "repository": {
+    "url": "https://github.com/wyre-technology/action1-mcp",
+    "source": "github"
+  },
+  "version": "0.0.0",
+  "websiteUrl": "https://github.com/wyre-technology/action1-mcp",
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/wyre-technology/action1-mcp:0.0.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "ACTION1_CLIENT_ID",
+          "description": "Action1 OAuth client ID",
+          "isRequired": true,
+          "format": "string"
+        },
+        {
+          "name": "ACTION1_CLIENT_SECRET",
+          "description": "Action1 OAuth client secret",
+          "isRequired": true,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "ACTION1_TENANT",
+          "description": "Action1 tenant identifier (subdomain). Provide this or ACTION1_BASE_URL.",
+          "isRequired": false,
+          "format": "string"
+        },
+        {
+          "name": "ACTION1_BASE_URL",
+          "description": "Action1 base URL (e.g. https://your-instance.action1.com). Provide this or ACTION1_TENANT.",
+          "isRequired": false,
+          "format": "string"
+        },
+        {
+          "name": "MCP_TRANSPORT",
+          "description": "Transport mode for the server. Set to 'stdio' for local CLI use; the image defaults to 'http' for gateway hosting.",
+          "isRequired": false,
+          "default": "stdio",
+          "format": "string"
+        },
+        {
+          "name": "AUTH_MODE",
+          "description": "Credential source: 'env' reads vars locally, 'gateway' expects header injection from the WYRE MCP Gateway.",
+          "isRequired": false,
+          "default": "env",
+          "format": "string"
+        },
+        {
+          "name": "LOG_LEVEL",
+          "description": "Log verbosity: debug, info, warn, error",
+          "isRequired": false,
+          "default": "info",
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

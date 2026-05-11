@@ -1,0 +1,61 @@
+{
+  "manifest_version": "0.3",
+  "name": "action1-mcp",
+  "display_name": "Action1 MCP Server",
+  "version": "0.0.0",
+  "description": "MCP server for Action1 — endpoint inventory, patch visibility, and policy automation via the Model Context Protocol",
+  "long_description": "Provides AI assistants with structured read access to Action1 RMM data: organizations, endpoints, missing OS/application updates, and policies. Multi-region (NorthAmerica / Europe / AsiaPacific / Australia). Multi-org via MSP credentials. Read-only in v1 — deploy/automation surface is intentionally separate for blast-radius reasons.",
+  "author": { "name": "Wyre Technology", "url": "https://github.com/wyre-technology" },
+  "repository": { "type": "git", "url": "https://github.com/wyre-technology/action1-mcp" },
+  "homepage": "https://github.com/wyre-technology/action1-mcp",
+  "license": "Apache-2.0",
+  "keywords": ["action1", "rmm", "patch-management", "endpoint-management", "msp", "mcp"],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "ACTION1_API_KEY": "${user_config.action1_api_key}",
+        "ACTION1_SECRET": "${user_config.action1_secret}",
+        "ACTION1_REGION": "${user_config.action1_region}",
+        "ACTION1_DEFAULT_ORG_ID": "${user_config.action1_default_org_id}",
+        "MCP_TRANSPORT": "stdio"
+      }
+    }
+  },
+  "tools_generated": true,
+  "user_config": {
+    "action1_api_key": {
+      "type": "string",
+      "title": "Action1 API Key (Client ID)",
+      "description": "Generate at app.action1.com → Settings → API Credentials",
+      "sensitive": true,
+      "required": true
+    },
+    "action1_secret": {
+      "type": "string",
+      "title": "Action1 Secret",
+      "description": "Paired secret for the API key above (non-recoverable — copy on creation)",
+      "sensitive": true,
+      "required": true
+    },
+    "action1_region": {
+      "type": "string",
+      "title": "Action1 Region",
+      "description": "NorthAmerica | Europe | AsiaPacific | Australia (default NorthAmerica)",
+      "sensitive": false,
+      "required": false,
+      "default": "NorthAmerica"
+    },
+    "action1_default_org_id": {
+      "type": "string",
+      "title": "Default Organization ID",
+      "description": "Optional. If set, tools that take an organization_id will use this when none is provided.",
+      "sensitive": false,
+      "required": false
+    }
+  },
+  "compatibility": { "platforms": ["darwin", "win32", "linux"], "runtimes": { "node": ">=20.0.0" }, "claude_desktop": ">=0.10.0" }
+}

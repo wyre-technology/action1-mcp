@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.wyre-technology/action1-mcp",
   "title": "Action1",
-  "description": "MCP server for Action1 — endpoint inventory, patch visibility, and policy automation via the Action1 REST API.",
+  "description": "Action1 MCP server — endpoint inventory, patch visibility, and policy automation via REST API.",
   "repository": {
     "url": "https://github.com/wyre-technology/action1-mcp",
     "source": "github"

@@ -111,7 +111,7 @@ function buildServer(): Server {
     tools: await listAllTools(),
   }));
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
-    const { name, arguments: args } = req.params;
+    const { name } = req.params;
     try {
       return await dispatchTool(name, (req.params.arguments ?? {}) as Record<string, unknown>);
     } catch (error) {

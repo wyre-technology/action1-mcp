@@ -59,14 +59,27 @@ async function listAllTools(): Promise<Tool[]> {
   return tools;
 }
 
+interface ToolResult {
+  content: Array<{ type: "text"; text: string }>;
+  isError?: boolean;
+}
+
 async function dispatchTool(
   name: string,
   args: Record<string, unknown>,
-): Promise<{ content: Array<{ type: "text"; text: string }> }> {
+): Promise<ToolResult> {
   if (name === "action1_navigate") {
     const domain = args.domain as string;
     if (!isDomainName(domain)) {
-      throw new Error(`Unknown domain: ${domain}`);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Unknown domain: ${domain}. Available: ${getAvailableDomains().join(", ")}.`,
+          },
+        ],
+        isError: true,
+      };
     }
     const handler = await getDomainHandler(domain);
     const summary = handler.tools.map((t) => ({ name: t.name, description: t.description }));
@@ -78,7 +91,15 @@ async function dispatchTool(
       return handler.handle(name, args);
     }
   }
-  throw new Error(`Unknown tool: ${name}`);
+  return {
+    content: [
+      {
+        type: "text",
+        text: `Unknown tool: ${name}. Use action1_navigate to discover available tools by domain.`,
+      },
+    ],
+    isError: true,
+  };
 }
 
 function buildServer(): Server {
@@ -91,7 +112,15 @@ function buildServer(): Server {
   }));
   server.setRequestHandler(CallToolRequestSchema, async (req) => {
     const { name, arguments: args } = req.params;
-    return dispatchTool(name, (args ?? {}) as Record<string, unknown>);
+    try {
+      return await dispatchTool(name, (req.params.arguments ?? {}) as Record<string, unknown>);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return {
+        content: [{ type: "text", text: `Error: ${message}` }],
+        isError: true,
+      };
+    }
   });
   return server;
 }

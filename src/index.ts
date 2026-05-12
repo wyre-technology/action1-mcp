@@ -59,15 +59,10 @@ async function listAllTools(): Promise<Tool[]> {
   return tools;
 }
 
-interface ToolResult {
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}
-
 async function dispatchTool(
   name: string,
   args: Record<string, unknown>,
-): Promise<ToolResult> {
+) {
   if (name === "action1_navigate") {
     const domain = args.domain as string;
     if (!isDomainName(domain)) {
@@ -110,7 +105,7 @@ function buildServer(): Server {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: await listAllTools(),
   }));
-  server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  server.setRequestHandler(CallToolRequestSchema, async (req, _extra) => {
     const { name } = req.params;
     try {
       return await dispatchTool(name, (req.params.arguments ?? {}) as Record<string, unknown>);

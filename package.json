@@ -20,7 +20,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "pack:mcpb": "node scripts/pack-mcpb.js",
-    "validate:mcpb": "mcpb validate manifest.json"
+    "validate:mcpb": "npx @anthropic-ai/mcpb validate manifest.json"
   },
   "repository": {
     "type": "git",

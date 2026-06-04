@@ -10,7 +10,7 @@
  * Query enum. v1 covers read-only tools only.
  *
  * Auth: OAuth 2.0 client credentials grant
- *   POST https://app.action1.com/oauth2/token (NorthAmerica)
+ *   POST https://app.action1.com/api/3.0/oauth2/token (NorthAmerica)
  *   form: grant_type=client_credentials, client_id, client_secret
  *   returns: { access_token (JWT, 1h), refresh_token, expires_in, token_type: 'bearer' }
  *
@@ -64,7 +64,7 @@ export class Action1Client {
       client_id: this.opts.apiKey,
       client_secret: this.opts.secret,
     });
-    const res = await fetch(`${this.baseUrl}/oauth2/token`, {
+    const res = await fetch(`${this.baseUrl}/api/3.0/oauth2/token`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body,
@@ -116,14 +116,14 @@ export class Action1Client {
     const params = new URLSearchParams();
     if (args.limit) params.set("limit", String(args.limit));
     const qs = params.toString() ? `?${params}` : "";
-    return this.request(`/api/3.0/organizations/${encodeURIComponent(orgId)}/endpoints${qs}`);
+    return this.request(`/api/3.0/endpoints/managed/${encodeURIComponent(orgId)}${qs}`);
   }
 
   async getEndpoint(endpointId: string, args: { orgId?: string }): Promise<unknown> {
     const orgId = args.orgId ?? this.opts.defaultOrgId;
     if (!orgId) throw new Error("organization_id is required (no defaultOrgId configured)");
     return this.request(
-      `/api/3.0/organizations/${encodeURIComponent(orgId)}/endpoints/${encodeURIComponent(endpointId)}`,
+      `/api/3.0/endpoints/managed/${encodeURIComponent(orgId)}/${encodeURIComponent(endpointId)}`,
     );
   }
 
@@ -133,12 +133,12 @@ export class Action1Client {
     const params = new URLSearchParams();
     if (args.limit) params.set("limit", String(args.limit));
     const qs = params.toString() ? `?${params}` : "";
-    return this.request(`/api/3.0/organizations/${encodeURIComponent(orgId)}/missing_updates${qs}`);
+    return this.request(`/api/3.0/updates/${encodeURIComponent(orgId)}${qs}`);
   }
 
   async listPolicies(args: { orgId?: string }): Promise<unknown[]> {
     const orgId = args.orgId ?? this.opts.defaultOrgId;
     if (!orgId) throw new Error("organization_id is required (no defaultOrgId configured)");
-    return this.request(`/api/3.0/organizations/${encodeURIComponent(orgId)}/policies`);
+    return this.request(`/api/3.0/policies/instances/${encodeURIComponent(orgId)}`);
   }
 }

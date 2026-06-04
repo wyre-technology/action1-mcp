@@ -92,7 +92,7 @@ try {
   console.log('\n=== Packing MCPB bundle ===');
   const bundleName = pkg.name.replace(/^@.*\//, '');
   const bundlePath = join(ROOT, `${bundleName}.mcpb`);
-  run(`npx mcpb pack "${STAGING}" "${bundlePath}"`, { cwd: ROOT });
+  run(`npx @anthropic-ai/mcpb pack "${STAGING}" "${bundlePath}"`, { cwd: ROOT });
 
   // 9. Cleanup
   console.log('\n=== Cleanup ===');

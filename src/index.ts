@@ -136,18 +136,56 @@ function credentialsFromHeaders(req: IncomingMessage): Action1Credentials | null
 
 async function startHttp(): Promise<void> {
   const port = Number(process.env.PORT ?? 8080);
-  const server = buildServer();
-  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: () => crypto.randomUUID() });
-  await server.connect(transport);
 
   createServer((req: IncomingMessage, res: ServerResponse) => {
-    const creds = credentialsFromHeaders(req);
-    const handle = () => transport.handleRequest(req, res);
-    if (creds) {
-      runWithCredentials(creds, handle);
-    } else {
-      handle();
-    }
+    // Build a FRESH Server + Transport per request in stateless mode.
+    //
+    // A single shared stateful transport (sessionIdGenerator set) accepts
+    // exactly one `initialize` for its lifetime, so behind the multi-user
+    // gateway only the first client since container start got tools — every
+    // other client got `-32600 "Server already initialized"` and 0 tools.
+    // Stateless per-request servers let each client initialize independently.
+    const handleRequest = async (): Promise<void> => {
+      const server = buildServer();
+      const transport = new StreamableHTTPServerTransport({
+        // No sessionIdGenerator => stateless: re-initialization is allowed.
+        enableJsonResponse: true,
+      });
+      // Dispose the per-request server + transport when the response closes.
+      res.on("close", () => {
+        void transport.close();
+        void server.close();
+      });
+      await server.connect(transport);
+      await transport.handleRequest(req, res);
+    };
+
+    const run = async (): Promise<void> => {
+      const creds = credentialsFromHeaders(req);
+      // Build the fresh server+transport INSIDE the credential context so
+      // getClient() resolves per-request credentials from AsyncLocalStorage.
+      if (creds) {
+        await runWithCredentials(creds, handleRequest);
+      } else {
+        await handleRequest();
+      }
+    };
+
+    // Guard every request: an unhandled rejection here could otherwise reach a
+    // global handler and crash the container. Never rethrow.
+    run().catch((err: unknown) => {
+      console.error("action1-mcp request error:", err);
+      if (!res.headersSent) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        res.end(
+          JSON.stringify({
+            jsonrpc: "2.0",
+            error: { code: -32603, message: "Internal error" },
+            id: null,
+          }),
+        );
+      }
+    });
   }).listen(port, () => {
     console.error(`action1-mcp HTTP listening on :${port}`);
   });
